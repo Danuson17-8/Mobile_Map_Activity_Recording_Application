@@ -1,8 +1,8 @@
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 
-class PinFuntion {
-  
-    static Widget buildNumberButton(String number,  void Function(String) onNumberPress) {
+  Widget buildNumberButton(String number,  void Function(String) onNumberPress) {
     return GestureDetector(
       onTap: () => onNumberPress(number),
       child: Container(
@@ -23,7 +23,7 @@ class PinFuntion {
     );
   }
 
-  static Widget buildDeleteButton(VoidCallback onDeletePress) {
+  Widget buildDeleteButton(VoidCallback onDeletePress) {
     return GestureDetector(
       onTap: onDeletePress,
       child: Container(
@@ -40,4 +40,18 @@ class PinFuntion {
     );
   }
 
-}
+  //ตรวจประเภทรูปภาพแล้วแสดง
+  Widget resolveImageWidget({required String imagePath}) {
+    final isAsset1 = imagePath.startsWith('data:image/png;base64,');
+    return isAsset1
+      ? Image.memory(
+        Uint8List.fromList(base64Decode(imagePath.split(',').last)),
+        fit: BoxFit.contain,
+      )
+      : Image.asset(
+        imagePath,
+        width: 45,
+        height: 45,
+        fit: BoxFit.contain,
+    );
+  }

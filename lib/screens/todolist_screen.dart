@@ -2,7 +2,7 @@
 import 'package:application_map_todolist/providers/event_provider.dart';
 import 'package:application_map_todolist/screens/event_view_screen.dart';
 import 'package:application_map_todolist/models/type_model.dart';
-import 'package:application_map_todolist/units/mmfuntion.dart';
+import 'package:application_map_todolist/units/funtion.dart';
 import 'package:flutter/material.dart';
 import 'package:application_map_todolist/models/event_model.dart';
 import 'package:provider/provider.dart';
@@ -20,7 +20,6 @@ class _EventsPageState extends State<ListEvents> with SingleTickerProviderStateM
   late TabController _tabController;
   List<Type> typeEvent = [];
   int eventCount = 0;
-
   List<Event> events = [];
   List<Event> upcomingEvents = [];
   List<Event> ongoingEvents = [];
@@ -137,7 +136,7 @@ class _EventsPageState extends State<ListEvents> with SingleTickerProviderStateM
     );
   }
 
-  //buildAppBar
+  //TabBar
   Widget builtTabBar() {
     return Container(
       height: 40,
@@ -169,6 +168,7 @@ class _EventsPageState extends State<ListEvents> with SingleTickerProviderStateM
     );
   }
 
+  //AppBar
   Widget buildAppBar() {
     return Stack(
       children: [
@@ -182,25 +182,24 @@ class _EventsPageState extends State<ListEvents> with SingleTickerProviderStateM
           ),
         ),
         Align(
-  alignment: Alignment(-0.4, -0.3),
-  child:
-        Container(
-          width: 200,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(eventCount.toString(), 
-                style: TextStyle(
-                  fontSize: 80, 
-                  color: Colors.white,  
-                  fontWeight: FontWeight.bold, 
-                  fontFamily: 'PixelFont', 
-                  letterSpacing: 5.0
+          alignment: Alignment(-0.4, -0.3),
+          child: Container(
+            width: 200,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(eventCount.toString(), 
+                  style: TextStyle(
+                    fontSize: 80, 
+                    color: Colors.white,  
+                    fontWeight: FontWeight.bold, 
+                    fontFamily: 'PixelFont', 
+                    letterSpacing: 5.0
+                  ),
                 ),
-              ),
-            ],
-          )
-        ),
+              ],
+            )
+          ),
         ),
         Positioned(
           top: 50,
@@ -262,11 +261,18 @@ class _EventsPageState extends State<ListEvents> with SingleTickerProviderStateM
             child: Column(
               children: typeEvent
                   .map(
-                    (type) => ListTile(
-                      title: Text(type.name), // เปลี่ยนให้ตรงกับชื่อ field
-                      onTap: () {
-                        Navigator.of(context).pop(type.typeId);
-                      },
+                    (type) => Container(
+                      margin: EdgeInsets.symmetric(vertical: 5),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10)
+                      ),
+                      child: ListTile(
+                        title: Text(type.name), // เปลี่ยนให้ตรงกับชื่อ field
+                        onTap: () {
+                          Navigator.of(context).pop(type.typeId);
+                        },
+                      ),
                     ),
                   )
                   .toList(),
@@ -295,7 +301,15 @@ class _EventsPageState extends State<ListEvents> with SingleTickerProviderStateM
   }
 
   Widget _buildEventList(List<Event> events) {
-    return viewMode == 1
+    return events.isEmpty
+      ? Center(
+        child: Image.asset(
+          height: 100,
+          width: 100,
+          'assets/image_sticker/sticker_think_event.png'
+        ),
+      )
+      : viewMode == 1
       ? GridView.builder(
         padding: EdgeInsets.all(5.0),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -319,7 +333,6 @@ class _EventsPageState extends State<ListEvents> with SingleTickerProviderStateM
         },
       );
   }
-
 
   Widget _buildEventCard(Event event) {
     return Card(
@@ -392,11 +405,11 @@ class _EventsPageState extends State<ListEvents> with SingleTickerProviderStateM
     return Container(
       width: 60,
       height: 60,
-      child: Mfuntion.resolveImageWidget(imagePath: imagePath)
+      child: resolveImageWidget(imagePath: imagePath)
     );
   }
 
-  Widget buildEventTitle({required String title, int length = 14}) {
+  Widget buildEventTitle({required String title, int length = 15}) {
     return Text(
       title.length > length ? title.substring(0, length) + '..' : title,
       style: TextStyle(
@@ -423,7 +436,9 @@ class _EventsPageState extends State<ListEvents> with SingleTickerProviderStateM
         color: const Color.fromARGB(255, 217, 217, 217),
         borderRadius: BorderRadius.circular(5)
       ),
-      child: Text(type.name, style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: const Color.fromARGB(255, 110, 110, 110))),
+      child: Text(
+        type.name.length > 10 ? type.name.substring(0, 10) + '..' : type.name,
+        style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: const Color.fromARGB(255, 110, 110, 110))),
     );
   }
   

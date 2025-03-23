@@ -45,7 +45,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      locale: const Locale('th', 'TH'), // ตั้งค่าเป็นภาษาไทย
+      locale: const Locale('th', 'TH'),
       supportedLocales: const [
         Locale('en', 'US'),
         Locale('th', 'TH'),

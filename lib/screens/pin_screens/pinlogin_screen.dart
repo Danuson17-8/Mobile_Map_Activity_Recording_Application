@@ -109,11 +109,11 @@ class _PinLoginScreenState extends State<PinLoginScreen> {
                 if (index == 9) {
                   return const SizedBox.shrink(); // ช่องว่างสำหรับตำแหน่งที่ 9
                 } else if (index == 10) {
-                  return PinFuntion.buildNumberButton("0", _onNumberPress);
+                  return buildNumberButton("0", _onNumberPress);
                 } else if (index == 11) {
-                  return PinFuntion.buildDeleteButton(_onDeletePress);
+                  return buildDeleteButton(_onDeletePress);
                 } else {
-                  return PinFuntion.buildNumberButton((index + 1).toString(), _onNumberPress);
+                  return buildNumberButton((index + 1).toString(), _onNumberPress);
                 }
               },
             ),

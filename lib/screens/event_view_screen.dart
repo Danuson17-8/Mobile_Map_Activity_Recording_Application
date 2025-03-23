@@ -1,8 +1,9 @@
 
 import 'package:application_map_todolist/screens/home_screen.dart';
-import 'package:application_map_todolist/units/mmfuntion.dart';
+import 'package:application_map_todolist/units/dialog_helper.dart';
+import 'package:application_map_todolist/units/funtion.dart';
 import 'package:flutter/material.dart';
-import 'package:application_map_todolist/wiggets/event_Editing.dart';
+import 'package:application_map_todolist/widgets/event_Editing.dart';
 import 'package:application_map_todolist/models/event_model.dart';
 import 'package:application_map_todolist/models/type_model.dart';
 import 'package:provider/provider.dart';
@@ -35,18 +36,20 @@ class _EventViewingState extends State<EventViewing> {
         actions: buildViewingActions(context, event),
       ),
       body: Padding(
-        padding: EdgeInsets.only(top: 16, bottom: 70, left: 16, right: 16),
-        child: Column(
-          children: [
-          buildTitle(event),
-          const SizedBox(height: 10),
-          buildImage(event),
-          const SizedBox(height: 10),
-          buildDateTime(event),
-          const SizedBox(height: 20),
-          buildDescriotion(event),
-          ],
-        )
+        padding: EdgeInsets.only(top: 16, bottom: 30, left: 16, right: 16),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+            buildTitle(event),
+            const SizedBox(height: 10),
+            buildImage(event),
+            const SizedBox(height: 10),
+            buildDateTime(event),
+            const SizedBox(height: 20),
+            buildDescriotion(event),
+            ],
+          ),
+        ),
       ),
       floatingActionButton: FloatingActionButton(
       onPressed: () async {
@@ -88,7 +91,7 @@ class _EventViewingState extends State<EventViewing> {
         borderRadius: BorderRadius.circular(12),
         color: Colors.white,
       ),
-      child: Mfuntion.resolveImageWidget(imagePath: event.image),
+      child: resolveImageWidget(imagePath: event.image),
     );
   }
 
@@ -223,47 +226,18 @@ class _EventViewingState extends State<EventViewing> {
       ),
       IconButton(
         icon: Icon(Icons.delete, color: Color.fromARGB(255, 98, 197, 162),),
-        onPressed: () {
-          _confirmDelete(event);
+        onPressed: () async {
+          final isDeleted = await DialogHelper.confirmDelete(
+            context: context,
+            text: 'ลบกิจกรรม ${event.title}',
+          );
+          if(isDeleted == true) {
+            final provider = Provider.of<EventProvider>(context, listen: false);
+            provider.deleteEvent(event.id);
+            Navigator.of(context).pop('true');
+          }
         }
       ),
     ];
-  }
-
-  void _confirmDelete(Event event) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Colors.white,
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text('ยืนยันการลบ'),
-            ],
-          ),
-          content: Text('กิจกรรม ${event.title}', style: TextStyle(fontSize: 16),),
-          actions: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                CloseButton(
-                  color: const Color.fromARGB(255, 98, 197, 162),
-                ),
-                IconButton(
-                  icon: Icon(Icons.done, color: const Color.fromARGB(255, 98, 197, 162)),
-                  onPressed: () {
-                    final provider = Provider.of<EventProvider>(context, listen: false);
-                    provider.deleteEvent(event.id);
-                    Navigator.pop(context);
-                    Navigator.of(context).pop('true');
-                  },
-                ),
-              ],
-            ),
-          ],
-        );
-      },
-    );
   }
 }

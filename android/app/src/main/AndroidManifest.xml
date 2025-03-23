@@ -14,7 +14,7 @@
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
 
     <application
-        android:label="application_map_todolist"
+        android:label="MapList"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
@@ -44,9 +44,8 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
-        <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="${MAPS_API_KEY}"/>
+        <meta-data android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyDM_jiIQkI72-9w9APS5nDyT4WWKHzsq7E"/>
         <receiver android:name="com.dexterous.flutterlocalnotifications.receivers.NotificationReceiver"/>
         <receiver android:name="com.dexterous.flutterlocalnotifications.receivers.NotificationBroadcastReceiver"/>
         <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver"/>

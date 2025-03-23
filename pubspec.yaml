@@ -46,9 +46,10 @@ flutter:
       - asset: assets/fonts/pixel_font.ttf
   assets:
     - assets/
-    - assets/setting/
+    - assets/image_setting/
     - assets/image_list/
     - assets/image_tutorial/
+    - assets/image_sticker/
 
 flutter_icons:
   android: true

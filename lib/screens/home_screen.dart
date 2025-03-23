@@ -1,4 +1,4 @@
-import 'package:application_map_todolist/wiggets/task_widget.dart';
+import 'package:application_map_todolist/widgets/task_widget.dart';
 import 'package:application_map_todolist/screens/calender_screen.dart';
 import 'package:application_map_todolist/screens/map_screen.dart';
 import 'package:application_map_todolist/screens/setting_screen.dart';

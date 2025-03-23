@@ -3,10 +3,10 @@ import 'package:application_map_todolist/models/event_model.dart';
 import 'package:application_map_todolist/models/marker_model.dart';
 import 'package:application_map_todolist/models/type_model.dart';
 import 'package:application_map_todolist/services/data_storage.dart';
-import 'package:application_map_todolist/units/mmfuntion.dart';
+import 'package:application_map_todolist/units/funtion.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:application_map_todolist/wiggets/event_Editing.dart';
+import 'package:application_map_todolist/widgets/event_Editing.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
@@ -29,7 +29,7 @@ class MyMap extends StatefulWidget {
 }
 
 class MyGoogleMap extends State<MyMap> {
-  final apiKey = 'API_KEY';
+  final apiKey = 'AIzaSyDM_jiIQkI72-9w9APS5nDyT4WWKHzsq7E';
   late EventProvider provider;
   List<Event> events = [];
   List<Type> types = [];
@@ -43,6 +43,7 @@ class MyGoogleMap extends State<MyMap> {
   Set<Polyline> polylines = {};
   LatLng? whereMarker ;
   String image = '';
+  bool _isImageSelectorShown = false;
   final List<String> imageList = [
     'assets/image_list/barber.png',
     'assets/image_list/business.png',
@@ -77,14 +78,7 @@ class MyGoogleMap extends State<MyMap> {
     _loadMarkersOnMap();
   }
 
-  Future<void> _deleteMarker(String markerId) async {
-    provider.deleteMarker(markerId);
-    setState(() {
-      _markers.removeWhere((marker) => marker.markerId == MarkerId(markerId));
-    });
-  }
-
-   Future<void> _loadMarkersOnMap() async {
+  Future<void> _loadMarkersOnMap() async {
     final marker = await DataStorage().getMarkers();
     await generateMarkers(marker);
     if(widget.onNavigate == 2) {
@@ -92,17 +86,73 @@ class MyGoogleMap extends State<MyMap> {
     }
   }
 
-  Future<void> generateMarkers(List<MarkerEvent> markers) async {
-    Set<Marker> newMarker = {};
-    for (var markerData in markers) {
-      
-      if (selectedType != null && !selectedType!.contains(markerData.markerId)) {
-        continue; // ข้ามถ้า markerId ไม่อยู่ใน selectedType
-      }
+  @override
+  Widget build(BuildContext context) {
+    events = Provider.of<EventProvider>(context).events;
+    types = Provider.of<EventProvider>(context).types;
+    return Scaffold(
+      body: FutureBuilder(
+        future: getlocation(),
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
+          if (snapshot.hasData) {
+            if(widget.onNavigate == 1) {
+              if (!_isImageSelectorShown) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  showImageSelector(context, userLocation!);
+                  _isImageSelectorShown = true;
+                });
+              }
+            }
+            return Stack (
+              children: <Widget>[
+                GoogleMap(
+                  mapType: MapType.terrain,
+                  myLocationEnabled: true,
+                  zoomControlsEnabled: false,
+                  myLocationButtonEnabled: false,
+                  trafficEnabled: true,
+                  initialCameraPosition: CameraPosition(
+                    target: LatLng(userLocation!.latitude, userLocation!.longitude),
+                    zoom: 18,
+                  ),
+                  onMapCreated: _onMapCreated,
+                  markers: _markers,
+                  onTap: _onTap,
+                  polylines: polylines,
+                ),
+                buildTypeSelectionButton(),
+                buildUserlocationButton(),
+                buildSearchtab(),
+              ],
+            );
+          } else {
+            return  Center(
+              child: Image.asset(
+                height: 100,
+                width: 100,
+                'assets/image_sticker/sticker_hi.png'
+              ),
+            );
+          }
+        }
+      ),
+    );
+  }
 
-      Position positionload = Position(
-        latitude: markerData.lat,
-        longitude: markerData.lng,
+
+  //ลบกิจกรรมในแผนที่
+  Future<void> _deleteMarker(String markerId) async {
+    provider.deleteMarker(markerId);
+    setState(() {
+      _markers.removeWhere((marker) => marker.markerId == MarkerId(markerId));
+    });
+  }
+
+  //แปลง latlng เป็น position
+  Position _getPosition(double lat, double lng) {
+    final Position position = Position(
+        latitude: lat,
+        longitude: lng,
         altitudeAccuracy: 0,
         headingAccuracy: 0,
         timestamp: DateTime(0),
@@ -112,13 +162,21 @@ class MyGoogleMap extends State<MyMap> {
         speed: 0,
         speedAccuracy: 0,
       );
+    return position ;
+  }
+
+  //โหลดMarker
+  Future<void> generateMarkers(List<MarkerEvent> markers) async {
+    Set<Marker> newMarker = {};
+    for (var markerData in markers) {
+      if (selectedType != null && !selectedType!.contains(markerData.markerId)) {
+        continue; // ข้ามถ้า markerId ไม่อยู่ใน selectedType
+      }
+      Position positionload = _getPosition(markerData.lat, markerData.lng);
       Marker marker = Marker(
         markerId: MarkerId(markerData.markerId),
         position: LatLng(markerData.lat, markerData.lng),
         icon: BitmapDescriptor.fromBytes(await getBytesFromPath(markerData.icon, 100)),
-        infoWindow: InfoWindow(
-          title: '🔴',
-        ),
         onTap: () {
           onMenuMaker(markerData.markerId, positionload, 'Old');
         }
@@ -131,7 +189,7 @@ class MyGoogleMap extends State<MyMap> {
     });
   }
 
-
+  //สร้าง marker
   void addCustomMarker(Position position, String markerId) async {
     final Uint8List markerIcon = await getBytesFromPath(image, 100);
     Marker marker = Marker(
@@ -148,6 +206,7 @@ class MyGoogleMap extends State<MyMap> {
     provider.addMarker(marker, image);
   }
 
+  //แปลงรูปภาพ image to ByteData
   Future<Uint8List> getBytesFromPath(String path, int width) async {
     if (path.startsWith('assets/')) {
       ByteData data = await rootBundle.load(path);
@@ -170,7 +229,7 @@ class MyGoogleMap extends State<MyMap> {
   }
 
 
-  // showImageSelector
+  //showImageSelector//
 
   void showImageSelector(BuildContext context, Position position) {
     final int markerId = DateTime.now().millisecondsSinceEpoch % 100000000;
@@ -319,15 +378,14 @@ class MyGoogleMap extends State<MyMap> {
       },
       child: Container(
         padding: EdgeInsets.all(15.0),
-        child: Mfuntion.resolveImageWidget(imagePath: imagePath)
+        child: resolveImageWidget(imagePath: imagePath)
       ),
     );
   }
 
-  // END showImageSelector
+  // END showImageSelector //
 
-
-
+  //รับตำแหน่งผู่ใช้
   Future<Position?> getlocation() async {
     try {
       LocationPermission permission = await Geolocator.checkPermission();
@@ -349,19 +407,9 @@ class MyGoogleMap extends State<MyMap> {
     MapcontrollerCompleter.complete(controller);
   }
 
- void _onTap(LatLng position) {
-    Position positionGO = Position(
-      latitude: position.latitude,
-      longitude: position.longitude,
-      altitudeAccuracy: 0,
-      headingAccuracy: 0,
-      timestamp: DateTime(0),
-      accuracy: 0,
-      altitude: 0,
-      heading: 0,
-      speed: 0,
-      speedAccuracy: 0,
-    );
+  //แตะบนแผนที่
+  void _onTap(LatLng position) {
+    Position Newposition = _getPosition(position.latitude, position.longitude);
     setState(() {
       polylines.clear();
       _markers.add(
@@ -369,13 +417,14 @@ class MyGoogleMap extends State<MyMap> {
           markerId: MarkerId('1'),
           position: LatLng(position.latitude, position.longitude),
             onTap: () {
-              onMenuMaker('1', positionGO, 'New');
+              onMenuMaker('1', Newposition, 'New');
             },
         ),
       );
     });
   }
 
+  //ข้อมูลเส้นทาง
   Future<void> _getPolyline(Position endLocation) async {
     final String url =
       'https://maps.googleapis.com/maps/api/directions/json?origin=${userLocation!.latitude},${userLocation!.longitude}&destination=${endLocation.latitude},${endLocation.longitude}&key=$apiKey';
@@ -404,6 +453,7 @@ class MyGoogleMap extends State<MyMap> {
     }
   }
 
+  //ค้นหาสถานที่
   Future<void> _searchPlace() async {
     final query = Uri.encodeComponent(_searchController.text);
     final url = "https://maps.googleapis.com/maps/api/geocode/json?address=$query&key=$apiKey";
@@ -429,6 +479,9 @@ class MyGoogleMap extends State<MyMap> {
     }
   }
 
+  //Popup Menu //
+
+  //เมนู marker
   void onMenuMaker(String markerId, Position position, String markerNewOrOld) {
     _markers.removeWhere((marker) => marker.markerId.value == '1');
     showDialog(
@@ -525,8 +578,9 @@ class MyGoogleMap extends State<MyMap> {
     );
   }
 
-    //  END Popup Menu //
+  //  END Popup Menu //
 
+  //ตามตำแหน่งผู้ใช้
    void _TrackingUser(Position? userLocation) async {
     await getlocation();
     if (userLocation != null) {
@@ -534,60 +588,6 @@ class MyGoogleMap extends State<MyMap> {
         CameraUpdate.newLatLng(LatLng(userLocation.latitude, userLocation.longitude)),
       );
     }
-  }
-
-  bool _isImageSelectorShown = false;
-
-  @override
-  Widget build(BuildContext context) {
-    events = Provider.of<EventProvider>(context).events;
-    types = Provider.of<EventProvider>(context).types;
-    return Scaffold(
-      body: FutureBuilder(
-        future: getlocation(),
-        builder: (BuildContext context, AsyncSnapshot snapshot) {
-          if (snapshot.hasData) {
-            if(widget.onNavigate == 1) {
-              if (!_isImageSelectorShown) {
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  showImageSelector(context, userLocation!);
-                  _isImageSelectorShown = true;
-                });
-              }
-            }
-            return Stack (
-              children: <Widget>[
-                GoogleMap(
-                  mapType: MapType.terrain,
-                  myLocationEnabled: true,
-                  zoomControlsEnabled: false,
-                  myLocationButtonEnabled: false,
-                  trafficEnabled: true,
-                  initialCameraPosition: CameraPosition(
-                    target: LatLng(userLocation!.latitude, userLocation!.longitude),
-                    zoom: 18,
-                  ),
-                  onMapCreated: _onMapCreated,
-                  markers: _markers,
-                  onTap: _onTap,
-                  polylines: polylines,
-                ),
-                buildTypeSelectionButton(),
-                buildUserlocationButton(),
-                buildSearchtab(),
-              ],
-            );
-          } else {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[CircularProgressIndicator()],
-              ),
-            );
-          }
-        }
-      ),
-    );
   }
 
   // แสดง Dialog ให้ผู้ใช้เลือกประเภทกิจกรรม
@@ -609,18 +609,24 @@ class MyGoogleMap extends State<MyMap> {
             child: Column(
               children: types
                   .map(
-                    (type) => ListTile(
-                      title: Text(type.name), // เปลี่ยนให้ตรงกับชื่อ field
-                      onTap: () {
-                      // กรอง events ที่มี typeId ตรงกับที่เลือก
-                      List<String> matchingEventIds = events
-                          .where((event) => event.typeId == type.typeId)
-                          .map((event) => event.id)
-                          .toList();
-                      
-                      // ส่งค่า event.id ที่ตรงออกไป
-                      Navigator.of(context).pop(matchingEventIds);
-                      },
+                    (type) => Container(
+                      margin: EdgeInsets.symmetric(vertical: 5),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10)
+                      ),
+                      child: ListTile(
+                        title: Text(type.name),
+                        onTap: () {
+                        // กรอง events ที่มี typeId ตรงกับที่เลือก
+                        List<String> matchingEventIds = events
+                            .where((event) => event.typeId == type.typeId)
+                            .map((event) => event.id)
+                            .toList();
+                        // ส่งค่า event.id ที่ตรงออกไป
+                        Navigator.of(context).pop(matchingEventIds);
+                        },
+                      ),
                     ),
                   )
                   .toList(),
@@ -655,19 +661,15 @@ class MyGoogleMap extends State<MyMap> {
           (marker) => marker.markerId.value == id,
         );
         whereMarker = marker.position;
-        moveToWhereMarker();
+        Future.delayed(Duration(milliseconds: 1000), () {
+          if (whereMarker != null) {
+            Mapcontroller.animateCamera(
+              CameraUpdate.newLatLng(whereMarker!),
+            );
+          }
+        });
       } catch (e) {
-        debugPrint('❌ เกิดข้อมผิดพลาดการหาตำแหน่งกิจกรรม : $e');
-      }
-    });
-  }
-
-  void moveToWhereMarker() {
-    Future.delayed(Duration(milliseconds: 1000), () {
-      if (whereMarker != null) {
-        Mapcontroller.animateCamera(
-          CameraUpdate.newLatLng(whereMarker!),
-        );
+        debugPrint('เกิดข้อมผิดพลาดการหาตำแหน่งกิจกรรม : $e');
       }
     });
   }

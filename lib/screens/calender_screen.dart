@@ -3,7 +3,7 @@ import 'package:application_map_todolist/models/event_data_source.dart';
 import 'package:application_map_todolist/providers/event_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
-import 'package:application_map_todolist/wiggets/task_widget.dart';
+import 'package:application_map_todolist/widgets/task_widget.dart';
 
 class CalendarApp extends StatefulWidget {
   const CalendarApp({super.key});

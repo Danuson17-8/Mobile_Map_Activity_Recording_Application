@@ -1,7 +1,6 @@
 import 'package:application_map_todolist/services/data_storage.dart';
 import 'package:application_map_todolist/units/funtion.dart';
 import 'package:application_map_todolist/units/snackbar_util.dart';
-import 'package:application_map_todolist/wiggets/custom_buttons.dart';
 import 'package:flutter/material.dart';
 
 class CreatePinScreen extends StatefulWidget {
@@ -96,11 +95,11 @@ class _CreatePinScreenState extends State<CreatePinScreen> {
                 if (index == 9) {
                   return const SizedBox.shrink(); // ช่องว่างสำหรับตำแหน่งที่ 9
                 } else if (index == 10) {
-                  return PinFuntion.buildNumberButton("0", _onNumberPress);
+                  return buildNumberButton("0", _onNumberPress);
                 } else if (index == 11) {
-                  return PinFuntion.buildDeleteButton(_onDeletePress);
+                  return buildDeleteButton(_onDeletePress);
                 } else {
-                  return PinFuntion.buildNumberButton((index + 1).toString(), _onNumberPress);
+                  return buildNumberButton((index + 1).toString(), _onNumberPress);
                 }
               },
             ),
@@ -109,7 +108,10 @@ class _CreatePinScreenState extends State<CreatePinScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 CloseButton(color: Color.fromARGB(255, 98, 197, 162),),
-                CustomButtons().DoneButton(onPressed: _validatePin),
+                IconButton(
+                  onPressed: _validatePin,
+                  icon: Icon(Icons.done, color: const Color.fromARGB(255, 98, 197, 162), size: 30),
+                )
               ],
             )
           ],

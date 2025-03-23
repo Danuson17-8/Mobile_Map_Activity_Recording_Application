@@ -9,17 +9,14 @@ static String toDateTime(DateTime date) {
   return '${dateFormatDate.format(date)}\n${dateFormatTime.format(date)}';
 }
 
-
   static String toDate(DateTime dateTime) {
     final date = DateFormat.yMMMEd('th').format(dateTime) ;
-
     return '$date' ; 
 
   }
 
   static String toTime(DateTime dateTime) {
     final time = DateFormat.Hm().format(dateTime) ;
-
     return '$time' ; 
 
   }
@@ -37,14 +34,10 @@ static String toDateTime(DateTime date) {
     return dateTime.add(Duration(days: days));
   }
 
-
   static bool isSameDay(DateTime date1, DateTime date2) {
     return date1.year == date2.year &&
            date1.month == date2.month &&
            date1.day == date2.day;
   }
-
-  
-
 
 }
