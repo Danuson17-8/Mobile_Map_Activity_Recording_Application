@@ -45,7 +45,7 @@
             android:name="flutterEmbedding"
             android:value="2" />
         <meta-data android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyDM_jiIQkI72-9w9APS5nDyT4WWKHzsq7E"/>
+            android:value="KEY API"/>
         <receiver android:name="com.dexterous.flutterlocalnotifications.receivers.NotificationReceiver"/>
         <receiver android:name="com.dexterous.flutterlocalnotifications.receivers.NotificationBroadcastReceiver"/>
         <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver"/>

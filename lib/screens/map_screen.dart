@@ -29,7 +29,7 @@ class MyMap extends StatefulWidget {
 }
 
 class MyGoogleMap extends State<MyMap> {
-  final apiKey = 'AIzaSyDM_jiIQkI72-9w9APS5nDyT4WWKHzsq7E';
+  final apiKey = 'KEY API';
   late EventProvider provider;
   List<Event> events = [];
   List<Type> types = [];
